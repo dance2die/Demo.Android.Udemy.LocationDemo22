@@ -1,15 +1,28 @@
 package com.dance2die.demoandroidudemylocationdemo22;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity implements LocationListener {
+    private LocationManager locationManager;
+    private String provider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +39,27 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        List<String> all = locationManager.getAllProviders();
+        Log.v("All", all.toString());
+
+        provider = locationManager.getBestProvider(new Criteria(), false);
+        Log.i("provider", provider);
+
+
+        locationManager.requestLocationUpdates(provider, 0, 0, this);
+
+
+
+        Location location = locationManager.getLastKnownLocation(provider);
+        if (location != null) {
+            Log.i("Location Info", "location achieved");
+        } else {
+            Log.i("Location Info", "No Location :(");
+        }
     }
 
     @Override
@@ -48,5 +82,41 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        locationManager.requestLocationUpdates(provider, 400, 1, this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        locationManager.removeUpdates(this);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        Double lat = location.getLatitude();
+        Double lng = location.getLongitude();
+
+        Log.i("Location Info: Lat", lat.toString());
+        Log.i("Location Info: Lng", lng.toString());
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
     }
 }
