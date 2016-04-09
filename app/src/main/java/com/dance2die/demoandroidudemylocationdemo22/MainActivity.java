@@ -50,17 +50,37 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         Log.i("provider", provider);
 
 
-        locationManager.requestLocationUpdates(provider, 0, 0, this);
+        locationManager.requestLocationUpdates(provider, 400, 1, this);
 
 
 
-        Location location = locationManager.getLastKnownLocation(provider);
+//        Location location = locationManager.getLastKnownLocation(provider);
+        Location location = getLastKnownLocation();
         if (location != null) {
             Log.i("Location Info", "location achieved");
         } else {
             Log.i("Location Info", "No Location :(");
         }
     }
+
+    // http://stackoverflow.com/a/20465781/4035
+    private Location getLastKnownLocation() {
+//        locationManager = (LocationManager)getApplicationContext().getSystemService(LOCATION_SERVICE);
+        List<String> providers = locationManager.getProviders(true);
+        Location bestLocation = null;
+        for (String provider : providers) {
+            Location l = locationManager.getLastKnownLocation(provider);
+            if (l == null) {
+                continue;
+            }
+            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+                // Found best last known location: %s", l);
+                bestLocation = l;
+            }
+        }
+        return bestLocation;
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -118,5 +138,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Override
     public void onProviderDisabled(String provider) {
 
+    }
+
+    public void getLocation(View view){
+        Location location = getLastKnownLocation();
+        onLocationChanged(location);
     }
 }
